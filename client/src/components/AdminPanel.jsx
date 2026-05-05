@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Trash2, Send, Type, Activity, Edit2, X, CheckCircle, List, FileText, Monitor, Play } from 'lucide-react';
 
-const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDuration, setTextDuration }) => {
+const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDuration, setTextDuration, scrollSpeed, setScrollSpeed }) => {
   const [activeTab, setActiveTab] = useState('scroll'); // 'scroll' or 'text'
   const [text, setText] = useState('');
   const [type, setType] = useState('none');
@@ -33,6 +33,17 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
     } catch (error) {
       console.error('Error updating text duration:', error);
       showToast('Error updating duration', 'error');
+    }
+  };
+
+  const handleScrollSpeedChange = async (speed) => {
+    try {
+      await axios.post('/api/settings', { scrollSpeed: speed });
+      setScrollSpeed(speed);
+      showToast(`Scroll speed set to ${speed}s`);
+    } catch (error) {
+      console.error('Error updating scroll speed:', error);
+      showToast('Error updating scroll speed', 'error');
     }
   };
 
@@ -141,6 +152,23 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
               max="60" 
               value={textDuration || 5} 
               onChange={(e) => handleDurationChange(Number(e.target.value))}
+              style={{ width: '80px', padding: '0.5rem', borderRadius: '8px', border: '2px solid #cbd5e1', textAlign: 'center', fontWeight: 'bold', color: '#1d3557', margin: 0 }}
+            />
+            <span style={{ color: '#64748b', fontWeight: 'bold' }}>Seconds</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #cbd5e1', paddingTop: '1rem', marginTop: '1rem' }}>
+          <div style={{ color: '#64748b', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            SCROLL SPEED SETTING (TICKER):
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input 
+              type="number" 
+              min="1" 
+              max="100" 
+              value={scrollSpeed || 25} 
+              onChange={(e) => handleScrollSpeedChange(Number(e.target.value))}
               style={{ width: '80px', padding: '0.5rem', borderRadius: '8px', border: '2px solid #cbd5e1', textAlign: 'center', fontWeight: 'bold', color: '#1d3557', margin: 0 }}
             />
             <span style={{ color: '#64748b', fontWeight: 'bold' }}>Seconds</span>

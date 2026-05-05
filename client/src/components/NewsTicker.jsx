@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const NewsTicker = ({ scrolls: incomingScrolls, mode, onComplete }) => {
+const NewsTicker = ({ scrolls: incomingScrolls, mode, onComplete, scrollSpeed }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [displayScrolls, setDisplayScrolls] = useState(incomingScrolls);
   const pendingScrollsRef = useRef(incomingScrolls);
@@ -74,6 +74,7 @@ const NewsTicker = ({ scrolls: incomingScrolls, mode, onComplete }) => {
         <div 
           className={getContentClass()} 
           onAnimationIteration={handleAnimationIteration}
+          style={{ animationDuration: `${scrollSpeed || 25}s` }}
         >
           {items.map((item, index) => (
             <div 

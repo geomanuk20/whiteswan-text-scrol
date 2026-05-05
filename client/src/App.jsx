@@ -9,6 +9,7 @@ function App() {
   const [scrolls, setScrolls] = useState([]);
   const [displayMode, setDisplayMode] = useState('scroll'); // 'scroll', 'text', 'both'
   const [textDuration, setTextDuration] = useState(5);
+  const [scrollSpeed, setScrollSpeed] = useState(25);
 
   const [bothActiveView, setBothActiveView] = useState('scroll');
 
@@ -23,6 +24,9 @@ function App() {
         setDisplayMode(settingsRes.data.displayMode);
         if (settingsRes.data.textDuration !== undefined) {
           setTextDuration(settingsRes.data.textDuration);
+        }
+        if (settingsRes.data.scrollSpeed !== undefined) {
+          setScrollSpeed(settingsRes.data.scrollSpeed);
         }
       }
     } catch (error) {
@@ -75,6 +79,8 @@ function App() {
                 setDisplayMode={setDisplayMode}
                 textDuration={textDuration}
                 setTextDuration={setTextDuration}
+                scrollSpeed={scrollSpeed}
+                setScrollSpeed={setScrollSpeed}
               />
             </main>
           </div>
@@ -86,7 +92,7 @@ function App() {
 
       {/* Broadcast Graphics (Visible globally for preview & live output) */}
       {displayMode === 'scroll' && (
-        <NewsTicker scrolls={scrollingItems} mode={displayMode} />
+        <NewsTicker scrolls={scrollingItems} mode={displayMode} scrollSpeed={scrollSpeed} />
       )}
       {displayMode === 'text' && (
         <NewsCard items={cardItems} mode={displayMode} textDuration={textDuration} />
@@ -94,7 +100,7 @@ function App() {
       
       {/* BOTH MODE: Sequential Loop */}
       {displayMode === 'both' && bothActiveView === 'scroll' && (
-        <NewsTicker scrolls={scrollingItems} mode={displayMode} onComplete={() => handleBothComplete('scroll')} />
+        <NewsTicker scrolls={scrollingItems} mode={displayMode} scrollSpeed={scrollSpeed} onComplete={() => handleBothComplete('scroll')} />
       )}
       {displayMode === 'both' && bothActiveView === 'text' && (
         <NewsCard items={cardItems} mode={displayMode} textDuration={textDuration} onComplete={() => handleBothComplete('text')} />

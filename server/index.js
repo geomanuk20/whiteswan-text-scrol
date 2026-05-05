@@ -34,7 +34,8 @@ const Scroll = mongoose.model('Scroll', scrollSchema);
 // Routes
 const settingsSchema = new mongoose.Schema({
   displayMode: { type: String, default: 'scroll' }, // 'scroll', 'text', 'both'
-  textDuration: { type: Number, default: 5 } // Duration in seconds
+  textDuration: { type: Number, default: 5 }, // Duration in seconds
+  scrollSpeed: { type: Number, default: 25 } // Duration in seconds for a full scroll
 });
 
 const Settings = mongoose.model('Settings', settingsSchema);
@@ -43,7 +44,7 @@ const Settings = mongoose.model('Settings', settingsSchema);
 const initSettings = async () => {
   const count = await Settings.countDocuments();
   if (count === 0) {
-    await Settings.create({ displayMode: 'scroll', textDuration: 5 });
+    await Settings.create({ displayMode: 'scroll', textDuration: 5, scrollSpeed: 25 });
   }
 };
 initSettings();
@@ -63,6 +64,7 @@ app.post('/api/settings', async (req, res) => {
     const updateData = {};
     if (req.body.displayMode) updateData.displayMode = req.body.displayMode;
     if (req.body.textDuration !== undefined) updateData.textDuration = req.body.textDuration;
+    if (req.body.scrollSpeed !== undefined) updateData.scrollSpeed = req.body.scrollSpeed;
     
     const settings = await Settings.findOneAndUpdate({}, updateData, { new: true });
     res.json(settings);
