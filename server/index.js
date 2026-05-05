@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const path = require('path');
 
@@ -40,6 +42,24 @@ const settingsSchema = new mongoose.Schema({
 
 const Settings = mongoose.model('Settings', settingsSchema);
 
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true }
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Initialize admin if not exists
+const initAdmin = async () => {
+  const count = await User.countDocuments();
+  if (count === 0) {
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await User.create({ username: 'admin', password: hashedPassword });
+    console.log('Default admin created: admin / admin123');
+  }
+};
+initAdmin();
+
 // Initialize settings if not exists
 const initSettings = async () => {
   const count = await Settings.countDocuments();
@@ -48,6 +68,37 @@ const initSettings = async () => {
   }
 };
 initSettings();
+
+// Auth Routes
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    res.json({ token, username: user.username });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get('/api/auth/verify', async (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) return res.status(401).json({ message: 'User not found' });
+    res.json({ username: user.username });
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+});
 
 // Routes
 app.get('/api/settings', async (req, res) => {
