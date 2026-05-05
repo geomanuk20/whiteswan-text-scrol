@@ -15,8 +15,8 @@ function App() {
   const fetchData = async () => {
     try {
       const [scrollsRes, settingsRes] = await Promise.all([
-        axios.get('http://localhost:5005/api/scrolls'),
-        axios.get('http://localhost:5005/api/settings')
+        axios.get('/api/scrolls'),
+        axios.get('/api/settings')
       ]);
       setScrolls(scrollsRes.data);
       if (settingsRes.data) {

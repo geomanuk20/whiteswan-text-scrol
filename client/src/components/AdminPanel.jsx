@@ -17,7 +17,7 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
 
   const handleModeChange = async (mode) => {
     try {
-      await axios.post('http://localhost:5005/api/settings', { displayMode: mode });
+      await axios.post('/api/settings', { displayMode: mode });
       setDisplayMode(mode);
       showToast(`Display mode switched to ${mode.toUpperCase()}`);
     } catch (error) {
@@ -27,7 +27,7 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
 
   const handleDurationChange = async (duration) => {
     try {
-      await axios.post('http://localhost:5005/api/settings', { textDuration: duration });
+      await axios.post('/api/settings', { textDuration: duration });
       setTextDuration(duration);
       showToast(`Text duration set to ${duration}s`);
     } catch (error) {
@@ -41,7 +41,7 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
     if (!text) return;
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5005/api/scrolls/${editingId}`, { 
+        await axios.put(`/api/scrolls/${editingId}`, { 
           text, 
           type, 
           category: activeTab,
@@ -49,7 +49,7 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
         });
         showToast('Update successful!');
       } else {
-        await axios.post('http://localhost:5005/api/scrolls', { 
+        await axios.post('/api/scrolls', { 
           text, 
           type, 
           category: activeTab,
@@ -83,7 +83,7 @@ const AdminPanel = ({ scrolls, fetchScrolls, displayMode, setDisplayMode, textDu
 
   const deleteScroll = async (id) => {
     try {
-      await axios.delete(`http://localhost:5005/api/scrolls/${id}`);
+      await axios.delete(`/api/scrolls/${id}`);
       showToast('Successfully deleted!');
       fetchScrolls();
     } catch (error) {
