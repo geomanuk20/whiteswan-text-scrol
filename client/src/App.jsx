@@ -9,7 +9,7 @@ function App() {
   const [scrolls, setScrolls] = useState([]);
   const [displayMode, setDisplayMode] = useState('scroll'); // 'scroll', 'text', 'both'
   const [textDuration, setTextDuration] = useState(5);
-  const [scrollSpeed, setScrollSpeed] = useState(25);
+  const [scrollSpeed, setScrollSpeed] = useState(70);
 
   const [bothActiveView, setBothActiveView] = useState('scroll');
 

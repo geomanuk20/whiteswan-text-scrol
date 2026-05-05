@@ -35,7 +35,7 @@ const Scroll = mongoose.model('Scroll', scrollSchema);
 const settingsSchema = new mongoose.Schema({
   displayMode: { type: String, default: 'scroll' }, // 'scroll', 'text', 'both'
   textDuration: { type: Number, default: 5 }, // Duration in seconds
-  scrollSpeed: { type: Number, default: 25 } // Duration in seconds for a full scroll
+  scrollSpeed: { type: Number, default: 70 } // Duration in seconds for a full scroll
 });
 
 const Settings = mongoose.model('Settings', settingsSchema);
@@ -44,7 +44,7 @@ const Settings = mongoose.model('Settings', settingsSchema);
 const initSettings = async () => {
   const count = await Settings.countDocuments();
   if (count === 0) {
-    await Settings.create({ displayMode: 'scroll', textDuration: 5, scrollSpeed: 25 });
+    await Settings.create({ displayMode: 'scroll', textDuration: 5, scrollSpeed: 70 });
   }
 };
 initSettings();
