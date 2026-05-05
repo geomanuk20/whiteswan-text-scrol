@@ -378,6 +378,27 @@ input[type="text"]:focus {
   box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
   border-top: 4px solid #fff;
   animation: bar-slide-up 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.flash-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    115deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0) 35%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0) 65%, 
+    transparent 100%
+  );
+  animation: light-wave 4s infinite linear;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .flash-container.stacked {
@@ -602,4 +623,8 @@ input[type="text"]:focus {
 @keyframes curtain-reveal {
   0% { clip-path: inset(0 50% 0 50%); opacity: 0; }
   100% { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+@keyframes light-wave {
+  from { transform: translateX(-50%) skewX(-20deg); }
+  to { transform: translateX(100%) skewX(-20deg); }
 }
