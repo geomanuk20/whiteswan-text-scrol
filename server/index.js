@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5005;
@@ -14,7 +15,8 @@ app.use(cors({
   origin: true,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -23,10 +25,13 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Models
 const scrollSchema = new mongoose.Schema({
-  text: { type: String, required: true },
+  text: { type: String, default: '' },
   type: { type: String, default: 'none' }, // breaking, update, alert, info, none
-  category: { type: String, default: 'scroll' }, // scroll or text
+  category: { type: String, default: 'scroll' }, // scroll or text or call
   animation: { type: String, default: 'scroll-left' }, // scroll-left, fade, zoom
+  name: { type: String, default: '' }, // Caller / Reporter Name
+  image: { type: String, default: '' }, // Main Image URL
+  secondaryImage: { type: String, default: '' }, // Secondary Optional Image URL
   active: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
@@ -35,7 +40,7 @@ const Scroll = mongoose.model('Scroll', scrollSchema);
 
 // Routes
 const settingsSchema = new mongoose.Schema({
-  displayMode: { type: String, default: 'scroll' }, // 'scroll', 'text', 'both'
+  displayMode: { type: String, default: 'scroll' }, // 'scroll', 'text', 'both', 'call'
   textDuration: { type: Number, default: 5 }, // Duration in seconds
   scrollSpeed: { type: Number, default: 70 } // Duration in seconds for a full scroll
 });
@@ -117,7 +122,7 @@ app.post('/api/settings', async (req, res) => {
     if (req.body.textDuration !== undefined) updateData.textDuration = req.body.textDuration;
     if (req.body.scrollSpeed !== undefined) updateData.scrollSpeed = req.body.scrollSpeed;
     
-    const settings = await Settings.findOneAndUpdate({}, updateData, { new: true });
+    const settings = await Settings.findOneAndUpdate({}, updateData, { returnDocument: 'after' });
     res.json(settings);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -138,7 +143,10 @@ app.post('/api/scrolls', async (req, res) => {
     text: req.body.text,
     type: req.body.type || 'none',
     category: req.body.category || 'scroll',
-    animation: req.body.animation || 'scroll-left'
+    animation: req.body.animation || 'scroll-left',
+    name: req.body.name || '',
+    image: req.body.image || '',
+    secondaryImage: req.body.secondaryImage || ''
   });
 
   try {
@@ -158,9 +166,12 @@ app.put('/api/scrolls/:id', async (req, res) => {
         type: req.body.type,
         category: req.body.category,
         animation: req.body.animation,
+        name: req.body.name,
+        image: req.body.image,
+        secondaryImage: req.body.secondaryImage || '',
         active: req.body.active ?? true
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
     res.json(updatedScroll);
   } catch (err) {
@@ -177,13 +188,21 @@ app.delete('/api/scrolls/:id', async (req, res) => {
   }
 });
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve static files from the React app if built
+const distPath = path.join(__dirname, '../client/dist');
+const indexPath = path.join(distPath, 'index.html');
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
+
+// The "catchall" handler
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).json({ message: 'Route not found (Development Mode)' });
+  }
 });
 
 app.listen(PORT, () => {

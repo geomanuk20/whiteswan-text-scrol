@@ -4,11 +4,13 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import NewsTicker from './components/NewsTicker';
 import AdminPanel from './components/AdminPanel';
 import NewsCard from './components/NewsCard';
+import LiveCall from './components/LiveCall';
+import ThumbCard from './components/ThumbCard';
 import Login from './components/Login';
 
 function App() {
   const [scrolls, setScrolls] = useState([]);
-  const [displayMode, setDisplayMode] = useState('scroll'); // 'scroll', 'text', 'both'
+  const [displayMode, setDisplayMode] = useState('scroll'); // 'scroll', 'text', 'both', 'call'
   const [textDuration, setTextDuration] = useState(5);
   const [scrollSpeed, setScrollSpeed] = useState(70);
   const [auth, setAuth] = useState({ token: localStorage.getItem('whiteswan_token'), user: null });
@@ -90,6 +92,9 @@ function App() {
   // Filter items based on category
   const scrollingItems = scrolls.filter(s => (s.category || 'scroll') === 'scroll');
   const cardItems = scrolls.filter(s => s.category === 'text');
+  const callItems = scrolls.filter(s => s.category === 'call');
+  const thumbItems = scrolls.filter(s => s.category === 'thumb');
+  const newsItems = scrollingItems.length > 0 ? scrollingItems : (cardItems.length > 0 ? cardItems : scrolls);
 
   return (
     <>
@@ -141,15 +146,28 @@ function App() {
         <NewsTicker scrolls={scrollingItems} mode={displayMode} scrollSpeed={scrollSpeed} />
       )}
       {displayMode === 'text' && (
-        <NewsCard items={cardItems} mode={displayMode} textDuration={textDuration} />
+        <NewsCard items={cardItems.length > 0 ? cardItems : newsItems} mode={displayMode} textDuration={textDuration} />
+      )}
+      {displayMode === 'call' && (
+        <LiveCall callItems={callItems} newsItems={newsItems} cardItems={cardItems} mode={displayMode} textDuration={textDuration} scrollSpeed={scrollSpeed} />
+      )}
+      {displayMode === 'thumb' && (
+        <ThumbCard 
+          items={thumbItems.length > 0 ? thumbItems : scrolls} 
+          newsItems={newsItems} 
+          cardItems={cardItems}
+          mode={displayMode} 
+          textDuration={textDuration} 
+          scrollSpeed={scrollSpeed} 
+        />
       )}
       
-      {/* BOTH MODE: Sequential Loop */}
+      {/* BOTH MODE: Alternates strictly between Ticker Mode and Card Mode */}
       {displayMode === 'both' && bothActiveView === 'scroll' && (
         <NewsTicker scrolls={scrollingItems} mode={displayMode} scrollSpeed={scrollSpeed} onComplete={() => handleBothComplete('scroll')} />
       )}
       {displayMode === 'both' && bothActiveView === 'text' && (
-        <NewsCard items={cardItems} mode={displayMode} textDuration={textDuration} onComplete={() => handleBothComplete('text')} />
+        <NewsCard items={cardItems.length > 0 ? cardItems : newsItems} mode={displayMode} textDuration={textDuration} onComplete={() => handleBothComplete('text')} />
       )}
     </>
   );

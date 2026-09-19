@@ -37,8 +37,16 @@ const NewsTicker = ({ scrolls: incomingScrolls, mode, onComplete, scrollSpeed })
 
   if (!displayScrolls || displayScrolls.length === 0) return null;
 
-  // Double the items for seamless looping
-  const items = [...displayScrolls, ...displayScrolls];
+  // Multiply items dynamically to ensure a gap-free infinite marquee loop
+  const validDisplayScrolls = (displayScrolls && displayScrolls.length > 0)
+    ? displayScrolls.filter(i => i && i.text && i.text.trim() !== '')
+    : [{ text: 'തത്സമയം വാർത്തകൾ' }];
+
+  const multiplier = Math.max(2, Math.ceil(12 / validDisplayScrolls.length));
+  let items = [];
+  for (let i = 0; i < multiplier; i++) {
+    items = items.concat(validDisplayScrolls);
+  }
 
   const formatTime = (date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
